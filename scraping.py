@@ -23,7 +23,8 @@ def clean_text(original_list):
 
     for i in range(0, len(list_splitted)):
         for j in range(0, len(list_splitted[i])):
-                list_splitted[i][j]=re.sub('<!\[CDATA\[|]]>|\[CDATA\[|]|•|‘|\'|"|”|!|“|,|:|&|;|/|\+|\?|…|[.]+|-|–|—|→|\(|\)|<p>|<a>|<a|alt=|width=|title=|align=', '', list_splitted[i][j]) #i clean the text from link replytweet and @tag
+            if not re.search('https?|RT|href=|class=|src=|align=|border=|height=|width=|alt=|<p>|reading', list_splitted[i][j]):
+                list_splitted[i][j]=re.sub('<!\[CDATA\[|]]>|\[CDATA\[|]|•|‘|\'|"|”|!|“|,|:|&|;|/|\+|\?|…|[.]+|-|–|—|→|\(|\)|<p>|<a>|<a|<div', '', list_splitted[i][j]) #i clean the text from link replytweet and @tag
                 if not (len(list_splitted[i][j]) < 3 ):
                     if not (any(list_splitted[i][j].lower() in s for s in grammarlist)):
                         clean_title.append(list_splitted[i][j].lower())
@@ -44,9 +45,12 @@ list_description=[]
 similarity_vectorialList=[]
 #specify the url
 count=0
-url=["http://feeds.bbci.co.uk/news/world/rss.xml",\
-     "http://feeds.reuters.com/Reuters/worldNews",\
-     "https://www.yahoo.com/news/rss/"]
+#bbc,#other famous #the guardian #the wall street journal #new york times
+url=["http://feeds.bbci.co.uk/news/world/rss.xml", \
+     "http://feeds.reuters.com/Reuters/worldNews", \
+     "https://www.theguardian.com/international/rss", \
+     "http://www.wsj.com/xml/rss/3_7085.xml",\
+     "http://rss.nytimes.com/services/xml/rss/nyt/World.xml"]
 for i in url:
     try:
         page = urllib.request.urlopen(i)
@@ -69,13 +73,13 @@ for i in url:
     #tf-idf with only title (fake news,title safe page)...
     for item in clean_mashup:
         start = time.time()
-        doc_weight1,doc_weight2,not_replicated=vector_model.tf_idf(item,clean_title_fake[0])
-        similarity_vectorialList.append(vector_model.sim_vectorial(doc_weight1,doc_weight2,not_replicated))
+        doc_weight1,doc_weight2,not_replicated=word_netV2.tf_idf(item,clean_title_fake[0])
+        similarity_vectorialList.append(word_netV2.sim_vectorial(doc_weight1,doc_weight2,not_replicated))
         time_vector_model=time.time()-start
 
     winner_take_all=max(similarity_vectorialList)
 
-    if (winner_take_all>0):
+    if (winner_take_all>0.1):
         index_winner=similarity_vectorialList.index(max(similarity_vectorialList))
         print("Best similarity into: ",i,"\nSim= ",winner_take_all,"\nSafe news: ",clean_mashup[index_winner],"\nTitle fake news: ",clean_title_fake[0],"\nUrl: ",list_url[index_winner])
         count=count+1
