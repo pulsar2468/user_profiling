@@ -2,6 +2,7 @@ import urllib.request
 from bs4 import BeautifulSoup
 import re,time
 import word_netV2
+import lemmatizer_content
 import vector_model
 
 def clean_text(original_list):
@@ -43,6 +44,7 @@ list_titles=[]
 list_url=[]
 list_description=[]
 similarity_vectorialList=[]
+lemmatizer_mashup=[]
 #specify the url
 count=0
 #bbc,#other famous #the guardian #the wall street journal #new york times
@@ -66,22 +68,26 @@ for i in url:
         list_url.append(item.link.next_sibling)
 
     #stop word!
-    clean_list_safe=clean_text(list_titles)
+    #clean_list_safe=clean_text(list_titles)
+    #clean_description=clean_text(list_description)
     clean_title_fake=clean_text(fake_title)
-    clean_description=clean_text(list_description)
     clean_mashup=clean_text(list_mashup)
+    #lemmatizator of data-clean
+    lemmatizer_mashup=lemmatizer_content.lemmatizer_words(clean_mashup)
+    lemmatizer_fake=lemmatizer_content.lemmatizer_fake_news(clean_title_fake[0])
+
     #tf-idf with only title (fake news,title safe page)...
-    for item in clean_mashup:
+    for item in lemmatizer_mashup:
         start = time.time()
-        doc_weight1,doc_weight2,not_replicated=word_netV2.tf_idf(item,clean_title_fake[0])
-        similarity_vectorialList.append(word_netV2.sim_vectorial(doc_weight1,doc_weight2,not_replicated))
+        doc_weight1,doc_align_2,doc_weight2=word_netV2.tf_idf(item,lemmatizer_fake)
+        similarity_vectorialList.append(word_netV2.sim_vectorial(doc_weight1,doc_align_2,doc_weight2))
         time_vector_model=time.time()-start
 
     winner_take_all=max(similarity_vectorialList)
 
     if (winner_take_all>0.1):
         index_winner=similarity_vectorialList.index(max(similarity_vectorialList))
-        print("Best similarity into: ",i,"\nSim= ",winner_take_all,"\nSafe news: ",clean_mashup[index_winner],"\nTitle fake news: ",clean_title_fake[0],"\nUrl: ",list_url[index_winner])
+        print("Best similarity into: ",i,"\nSim= ",winner_take_all,"\nSafe news: ",lemmatizer_mashup[index_winner],"\nTitle fake news: ",lemmatizer_fake,"\nUrl: ",list_url[index_winner])
         count=count+1
     #Clear all lists
     similarity_vectorialList.clear()
