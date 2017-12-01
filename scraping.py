@@ -1,6 +1,8 @@
 import urllib.request
 from bs4 import BeautifulSoup
 import re,time
+
+import extraction_concepts
 import word_netV2
 import lemmatizer_content
 import vector_model
@@ -75,6 +77,11 @@ for i in url:
     #lemmatizator of data-clean
     lemmatizer_mashup=lemmatizer_content.lemmatizer_words(clean_mashup)
     lemmatizer_fake=lemmatizer_content.lemmatizer_fake_news(clean_title_fake[0])
+    #extraction entity from dbpedia spotlight
+    entity_list,abstract_list=extraction_concepts.get_concepts(lemmatizer_mashup)
+    print(entity_list,abstract_list)
+    exit()
+    '''
 
     #tf-idf with only title (fake news,title safe page)...
     for item in lemmatizer_mashup:
@@ -85,7 +92,7 @@ for i in url:
 
     winner_take_all=max(similarity_vectorialList)
 
-    if (winner_take_all>0.1):
+    if (winner_take_all>0.15):
         index_winner=similarity_vectorialList.index(max(similarity_vectorialList))
         print("Best similarity into: ",i,"\nSim= ",winner_take_all,"\nSafe news: ",lemmatizer_mashup[index_winner],"\nTitle fake news: ",lemmatizer_fake,"\nUrl: ",list_url[index_winner])
         count=count+1
@@ -96,3 +103,4 @@ for i in url:
     list_titles.clear()
     list_url.clear()
 print("Set safe page:",len(url),"\nStronger similarity to",count,"safe page")
+    '''
