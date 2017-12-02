@@ -100,6 +100,7 @@ def scan(j,repl_list):
 #input:list target X and Y
 #output: doc weighted 1, doc weighted 2, doc aligned 2 seeing the first
 def tf_idf(list1, list2):
+    print(list1,list2)
     j_bar=0
     doc_mix = []
     gold = []

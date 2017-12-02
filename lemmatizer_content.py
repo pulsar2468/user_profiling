@@ -10,10 +10,3 @@ def lemmatizer_words(clean_mashup):
         list_lemmatizer.append(tmp.copy())
         tmp.clear()
     return list_lemmatizer
-
-def lemmatizer_fake_news(fake_news):
-    wordnet_lemmatizer = WordNetLemmatizer()
-    list_lemmatizer=[]
-    for term in fake_news:
-        list_lemmatizer.append(wordnet_lemmatizer.lemmatize(term,'v'))
-    return list_lemmatizer
